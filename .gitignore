@@ -2,6 +2,7 @@
 
 # dependencies
 node_modules/
+*.xlsx
 
 # Expo
 .expo/
@@ -39,3 +40,22 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# AI assistant configs (local only)
+.claude/
+
+# EAS / secrets
+eas.json
+
+# SQLite veritabanı (cihazda kalır, repoya girmesin)
+*.db
+*.db-shm
+*.db-wal
+
+# Editör
+.vscode/settings.json
+.idea/
+
+# Yedek / patch dosyaları
+*.patch
+*.orig
