@@ -85,4 +85,36 @@ export async function initDatabase(): Promise<void> {
       PRAGMA user_version = 2;
     `);
   }
+
+  // Hatırlatmalar — migration v3
+  if (currentVersion < 3) {
+    await db.execAsync(`
+      CREATE TABLE IF NOT EXISTS reminders (
+        id                INTEGER PRIMARY KEY AUTOINCREMENT,
+        label             TEXT    NOT NULL,
+        category          TEXT    NOT NULL CHECK(category IN ('insulin', 'measurement')),
+
+        -- insulin_color: sadece category='insulin' için zorunlu
+        insulin_color     TEXT    CHECK(
+                            (category = 'insulin'     AND insulin_color IN ('turuncu', 'gri'))
+                            OR
+                            (category = 'measurement' AND insulin_color IS NULL)
+                          ),
+
+        hour              INTEGER NOT NULL CHECK(hour   BETWEEN 0 AND 23),
+        minute            INTEGER NOT NULL CHECK(minute BETWEEN 0 AND 59),
+
+        -- days_of_week: JSON array [1..7], 1=Pazartesi, 7=Pazar
+        -- Örn: her gün → [1,2,3,4,5,6,7], sadece Pzt-Cum → [1,2,3,4,5]
+        days_of_week      TEXT    NOT NULL,
+
+        is_active         INTEGER NOT NULL DEFAULT 1 CHECK(is_active IN (0, 1)),
+
+        -- notification_ids: JSON array — her seçili gün için ayrı expo notification ID
+        notification_ids  TEXT    NULL
+      );
+
+      PRAGMA user_version = 3;
+    `);
+  }
 }

@@ -44,7 +44,8 @@ yarn-error.*
 # AI assistant configs (local only)
 .claude/
 
-# EAS / secrets
+# EAS / secrets — production submit credentials buraya eklenebilir, public repoya girmesin
+# Dosya yoksa: eas.json'u proje root'una kopyala (README'de şema var)
 eas.json
 
 # SQLite veritabanı (cihazda kalır, repoya girmesin)

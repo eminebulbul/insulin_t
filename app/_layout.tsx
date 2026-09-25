@@ -5,6 +5,8 @@ import { StatusBar } from "expo-status-bar";
 
 import { initDatabase } from "@/db/schema";
 import { Colors, FontSize } from "@/constants/theme";
+import { setupNotificationChannel } from "@/utils/notifications";
+
 
 /**
  * Root layout — uygulamanın en dış katmanı.
@@ -22,10 +24,13 @@ export default function RootLayout() {
   const [dbError, setDbError] = useState<string | null>(null);
 
   useEffect(() => {
-    initDatabase()
+    Promise.all([
+      initDatabase(),
+      setupNotificationChannel(), // Android bildirim kanalı — iOS'ta no-op
+    ])
       .then(() => setDbReady(true))
       .catch((err) => {
-        console.error("Veritabanı başlatılamadı:", err);
+        console.error("Başlatma hatası:", err);
         setDbError("Uygulama başlatılamadı. Lütfen yeniden deneyin.");
       });
   }, []);
