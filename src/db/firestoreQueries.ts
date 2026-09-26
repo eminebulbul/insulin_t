@@ -150,6 +150,106 @@ export async function insertWater(params: {
   return docRef.id;
 }
 
+// ─── Ölçüm ve Su Güncelleme / Silme ──────────────────────────────────────────
+
+export type UpdateMeasurementParams =
+  | {
+      type: "glucose";
+      recordedAt: string;
+      mealTag: MealTag;
+      glucoseMg: number;
+      glucoseNote?: string | null;
+    }
+  | {
+      type: "blood_pressure";
+      recordedAt: string;
+      bpSystolic: number;
+      bpDiastolic: number;
+      bpNote?: string | null;
+    };
+
+/**
+ * Ölçüm kaydını günceller.
+ * DİKKAT: created_at alanına KESİNLİKLE dokunulmaz (denetim izi için sabit kalmalıdır).
+ */
+export async function updateMeasurement(
+  id: string,
+  params: UpdateMeasurementParams
+): Promise<void> {
+  if (!id) throw new Error("Doküman ID zorunludur.");
+  if (!params.recordedAt) throw new Error("Kayıt zamanı zorunludur.");
+
+  const docRef = doc(db, "measurements", id);
+
+  if (params.type === "glucose") {
+    if (!["aclik", "tokluk", "yatmadan_once", "diger"].includes(params.mealTag)) {
+      throw new Error("Geçerli bir öğün etiketi seçilmelidir.");
+    }
+    if (!params.glucoseMg || params.glucoseMg <= 0) {
+      throw new Error("Şeker değeri 0'dan büyük olmalıdır.");
+    }
+    await updateDoc(docRef, {
+      recorded_at: params.recordedAt,
+      meal_tag: params.mealTag,
+      glucose_mg: params.glucoseMg,
+      glucose_note: params.glucoseNote?.trim() || null,
+    });
+  } else if (params.type === "blood_pressure") {
+    if (!params.bpSystolic || params.bpSystolic <= 0) {
+      throw new Error("Büyük tansiyon 0'dan büyük olmalıdır.");
+    }
+    if (!params.bpDiastolic || params.bpDiastolic <= 0) {
+      throw new Error("Küçük tansiyon 0'dan büyük olmalıdır.");
+    }
+    await updateDoc(docRef, {
+      recorded_at: params.recordedAt,
+      bp_systolic: params.bpSystolic,
+      bp_diastolic: params.bpDiastolic,
+      bp_note: params.bpNote?.trim() || null,
+    });
+  }
+}
+
+/**
+ * Ölçüm kaydını Firestore'dan siler.
+ */
+export async function deleteMeasurement(id: string): Promise<void> {
+  if (!id) throw new Error("Doküman ID zorunludur.");
+  const docRef = doc(db, "measurements", id);
+  await deleteDoc(docRef);
+}
+
+/**
+ * Su kaydını günceller.
+ * DİKKAT: created_at alanına KESİNLİKLE dokunulmaz.
+ */
+export async function updateWaterEntry(params: {
+  id: string;
+  recordedAt: string;
+  waterMl: number;
+}): Promise<void> {
+  if (!params.id) throw new Error("Doküman ID zorunludur.");
+  if (!params.recordedAt) throw new Error("Kayıt zamanı zorunludur.");
+  if (!params.waterMl || params.waterMl <= 0) {
+    throw new Error("Su miktarı 0'dan büyük olmalıdır.");
+  }
+
+  const docRef = doc(db, "water_log", params.id);
+  await updateDoc(docRef, {
+    recorded_at: params.recordedAt,
+    water_ml: params.waterMl,
+  });
+}
+
+/**
+ * Su kaydını Firestore'dan siler.
+ */
+export async function deleteWaterEntry(id: string): Promise<void> {
+  if (!id) throw new Error("Doküman ID zorunludur.");
+  const docRef = doc(db, "water_log", id);
+  await deleteDoc(docRef);
+}
+
 // ─── Hatırlatma CRUD (Firestore Plan Dokümanı) ───────────────────────────────────
 
 export async function insertReminder(params: {

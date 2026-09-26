@@ -79,7 +79,10 @@ function TimePickerRow({
           value={pickerDate}
           mode="time"
           is24Hour={true}
-          display={Platform.OS === "ios" ? "spinner" : "default"}
+          display="spinner"
+          themeVariant="dark"
+          positiveButton={{ label: "Tamam", textColor: Colors.primary }}
+          negativeButton={{ label: "İptal", textColor: Colors.textSecondary }}
           onChange={(event, date) => {
             if (Platform.OS === "android") setShowPicker(false);
             if (event.type === "dismissed") {
@@ -104,17 +107,19 @@ const tpStyles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: Colors.surfaceAlt,
-    borderRadius: Radius.sm,
-    padding: Spacing.md,
-    gap: Spacing.sm,
+    borderRadius: Radius.md,
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.lg,
+    gap: Spacing.md,
     borderWidth: 1,
     borderColor: Colors.border,
+    minHeight: 60,
   },
-  clock: { fontSize: 22 },
+  clock: { fontSize: 26 },
   label: {
-    fontSize: FontSize.md,
+    fontSize: FontSize.lg,
     color: Colors.textPrimary,
-    fontWeight: "600",
+    fontWeight: "700",
   },
   warningText: {
     fontSize: FontSize.xs,
@@ -122,7 +127,7 @@ const tpStyles = StyleSheet.create({
     marginTop: 2,
   },
   chevron: {
-    fontSize: 24,
+    fontSize: 22,
     color: Colors.textSecondary,
     marginLeft: "auto",
   },

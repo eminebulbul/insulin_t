@@ -36,6 +36,10 @@ import {
   relativeDayLabel,
   formatShortDate,
 } from "@/utils/dateHelpers";
+import {
+  MeasurementActionModal,
+  ActionModalItem,
+} from "@/components/MeasurementActionModal";
 
 // Android'de LayoutAnimation için gerekli
 if (Platform.OS === "android") {
@@ -104,7 +108,13 @@ const tabStyles = StyleSheet.create({
 
 // ─── Ölçüm satırı ─────────────────────────────────────────────────────────────
 
-function MeasurementRow({ m }: { m: GlucoseMeasurement | BloodPressureMeasurement }) {
+function MeasurementRow({
+  m,
+  onPress,
+}: {
+  m: GlucoseMeasurement | BloodPressureMeasurement;
+  onPress: () => void;
+}) {
   const isGlucose = m.type === "glucose";
   const icon = isGlucose ? "🩸" : "💊";
   const time = formatTime(m.recorded_at);
@@ -119,7 +129,13 @@ function MeasurementRow({ m }: { m: GlucoseMeasurement | BloodPressureMeasuremen
     : (m as BloodPressureMeasurement).bp_note;
 
   return (
-    <View style={rowStyles.row}>
+    <TouchableOpacity
+      style={rowStyles.row}
+      onPress={onPress}
+      activeOpacity={0.7}
+      accessibilityRole="button"
+      accessibilityLabel={`${isGlucose ? "Şeker" : "Tansiyon"} kaydı: ${valueText}, düzenlemek veya silmek için dokunun`}
+    >
       <Text style={rowStyles.icon}>{icon}</Text>
       <View style={rowStyles.meta}>
         <Text style={rowStyles.time}>{time}</Text>
@@ -140,13 +156,28 @@ function MeasurementRow({ m }: { m: GlucoseMeasurement | BloodPressureMeasuremen
           <Text style={rowStyles.note}>{noteText}</Text>
         ) : null}
       </View>
-    </View>
+      <Text style={rowStyles.chevron}>›</Text>
+    </TouchableOpacity>
   );
 }
 
-function WaterRow({ ml, isoTime }: { ml: number; isoTime: string }) {
+function WaterRow({
+  ml,
+  isoTime,
+  onPress,
+}: {
+  ml: number;
+  isoTime: string;
+  onPress: () => void;
+}) {
   return (
-    <View style={rowStyles.row}>
+    <TouchableOpacity
+      style={rowStyles.row}
+      onPress={onPress}
+      activeOpacity={0.7}
+      accessibilityRole="button"
+      accessibilityLabel={`Su kaydı: ${ml} ml, düzenlemek veya silmek için dokunun`}
+    >
       <Text style={rowStyles.icon}>💧</Text>
       <View style={rowStyles.meta}>
         <Text style={rowStyles.time}>{formatTime(isoTime)}</Text>
@@ -154,20 +185,22 @@ function WaterRow({ ml, isoTime }: { ml: number; isoTime: string }) {
       <View style={rowStyles.valueBox}>
         <Text style={[rowStyles.value, { color: "#58A6FF" }]}>{ml} ml</Text>
       </View>
-    </View>
+      <Text style={rowStyles.chevron}>›</Text>
+    </TouchableOpacity>
   );
 }
 
 const rowStyles = StyleSheet.create({
   row: {
     flexDirection: "row",
-    alignItems: "flex-start",
-    paddingVertical: Spacing.sm,
+    alignItems: "center",
+    paddingVertical: Spacing.md,
     borderBottomWidth: 1,
     borderBottomColor: Colors.border,
     gap: Spacing.sm,
+    minHeight: 52,
   },
-  icon: { fontSize: 20, minWidth: 28, marginTop: 2 },
+  icon: { fontSize: 20, minWidth: 28 },
   meta: { width: 90 },
   time: {
     fontSize: FontSize.sm,
@@ -190,6 +223,11 @@ const rowStyles = StyleSheet.create({
     marginTop: 2,
     fontStyle: "italic",
   },
+  chevron: {
+    fontSize: 20,
+    color: Colors.textDisabled,
+    paddingLeft: Spacing.xs,
+  },
 });
 
 // ─── Günlük kart (katlanabilir) ───────────────────────────────────────────────
@@ -197,9 +235,11 @@ const rowStyles = StyleSheet.create({
 function DayCard({
   day,
   defaultOpen,
+  onSelectItem,
 }: {
   day: DayEntry;
   defaultOpen: boolean;
+  onSelectItem: (item: ActionModalItem) => void;
 }) {
   const [open, setOpen] = useState(defaultOpen);
 
@@ -222,9 +262,7 @@ function DayCard({
   };
 
   // Tüm kayıtları zamana göre sırala (ölçüm + su karışık)
-  type AnyEntry =
-    | { kind: "measurement"; data: GlucoseMeasurement | BloodPressureMeasurement }
-    | { kind: "water"; data: WaterEntry };
+  type AnyEntry = ActionModalItem;
 
   const allEntries: AnyEntry[] = [
     ...day.measurements.map((m) => ({ kind: "measurement" as const, data: m })),
@@ -265,14 +303,19 @@ function DayCard({
           {allEntries.length === 0 ? (
             <Text style={dayStyles.empty}>Bu gün kayıt yok.</Text>
           ) : (
-            allEntries.map((entry, i) =>
+            allEntries.map((entry) =>
               entry.kind === "measurement" ? (
-                <MeasurementRow key={`m-${entry.data.id}`} m={entry.data as GlucoseMeasurement | BloodPressureMeasurement} />
+                <MeasurementRow
+                  key={`m-${entry.data.id}`}
+                  m={entry.data as GlucoseMeasurement | BloodPressureMeasurement}
+                  onPress={() => onSelectItem(entry)}
+                />
               ) : (
                 <WaterRow
                   key={`w-${entry.data.id}`}
                   ml={entry.data.water_ml}
                   isoTime={entry.data.recorded_at}
+                  onPress={() => onSelectItem(entry)}
                 />
               )
             )
@@ -286,7 +329,7 @@ function DayCard({
               <Text style={dayStyles.footerChip}>💊 {bpCount} tansiyon</Text>
             )}
             {waterTotal > 0 && (
-              <Text style={dayStyles.footerChip}>💧 {waterTotal} ml</Text>
+              <Text style={dayStyles.footerChip}>💧 {waterTotal} ml su</Text>
             )}
           </View>
         </View>
@@ -294,6 +337,7 @@ function DayCard({
     </View>
   );
 }
+
 
 const dayStyles = StyleSheet.create({
   card: {
@@ -673,7 +717,11 @@ const chartStyles = StyleSheet.create({
 
 // ─── Liste sekmesi ─────────────────────────────────────────────────────────────
 
-function ListTab() {
+function ListTab({
+  onSelectItem,
+}: {
+  onSelectItem: (item: ActionModalItem) => void;
+}) {
   const [days, setDays] = useState<DayEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -728,9 +776,14 @@ function ListTab() {
 
   return (
     <>
-      <Text style={listStyles.subtitle}>Son 30 günün kayıtları</Text>
+      <Text style={listStyles.subtitle}>Son 30 günün kayıtları (düzenlemek için dokunun)</Text>
       {days.map((day, i) => (
-        <DayCard key={day.dateKey} day={day} defaultOpen={i === 0} />
+        <DayCard
+          key={day.dateKey}
+          day={day}
+          defaultOpen={i === 0}
+          onSelectItem={onSelectItem}
+        />
       ))}
     </>
   );
@@ -771,19 +824,34 @@ const listStyles = StyleSheet.create({
 
 export default function HistoryScreen() {
   const [activeTab, setActiveTab] = useState<Tab>("liste");
+  const [selectedItem, setSelectedItem] = useState<ActionModalItem | null>(null);
 
   return (
-    <ScrollView
-      style={styles.scroll}
-      contentContainerStyle={styles.content}
-      keyboardShouldPersistTaps="handled"
-      showsVerticalScrollIndicator={false}
-    >
-      <TopTabBar active={activeTab} onChange={setActiveTab} />
-      {activeTab === "liste" ? <ListTab /> : <ChartTab />}
-    </ScrollView>
+    <View style={{ flex: 1, backgroundColor: Colors.background }}>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        <TopTabBar active={activeTab} onChange={setActiveTab} />
+        {activeTab === "liste" ? (
+          <ListTab onSelectItem={setSelectedItem} />
+        ) : (
+          <ChartTab />
+        )}
+      </ScrollView>
+
+      {/* Düzenleme ve Silme Modalı */}
+      <MeasurementActionModal
+        visible={selectedItem !== null}
+        item={selectedItem}
+        onClose={() => setSelectedItem(null)}
+      />
+    </View>
   );
 }
+
 
 const styles = StyleSheet.create({
   scroll: { flex: 1, backgroundColor: Colors.background },

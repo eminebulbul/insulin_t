@@ -104,8 +104,15 @@ kontrast koyu tema, sade Türkçe arayüz.
 1. Giriş ekranı (şeker/tansiyon/su, SQLite) ✅
 2. Geçmiş ekranı (kart listesi + grafik) ✅
 3. Hatırlatmalar (insülin/ölçüm, bildirim kanalı, exact alarm) ✅ test edildi
-3.5. Bulut senkronizasyonu (Firestore, canlı senkron) 🔄 şu an bunun üzerinde
-     çalışılıyor
-4. PDF/paylaşılabilir doktor özeti — henüz yapılmadı
+3.5. Bulut senkronizasyonu (Firestore, canlı senkron) ✅ tamamlandı
+4. PDF/paylaşılabilir doktor özeti ✅ tamamlandı
+4.5. Ölçüm kayıtlarını düzenleme ve silme ✅ tamamlandı
 5. Sadeleştirme turu + gerçek kullanıcı testi — henüz yapılmadı
-6. Dağıtım (4 telefona APK) — henüz yapılmadı
+6. Dağıtım (4 telefona APK) 🔄 şu an bunun üzerinde çalışılıyor
+
+
+- Firestore sorgusunda birden fazla alan (where + orderBy, ya da iki
+  where) birlikte kullanılınca composite index gerekir. Hata mesajındaki
+  linke tıklayıp Console'da "Create Index"e basmak yeterli, ama mümkünse
+  az sayıda kayıt olan koleksiyonlarda (reminders gibi) filtrelemeyi
+  istemci tarafında yapmak bu index beklemesini önler.
