@@ -22,15 +22,13 @@ import {
   Reminder,
   ReminderCategory,
   InsulinColor,
-  getAllReminders,
   insertReminder,
   updateReminder,
   deleteReminder,
   setReminderActive,
-} from "@/db/reminderQueries";
+  subscribeToReminders,
+} from "@/db/firestoreQueries";
 import {
-  scheduleReminderNotifications,
-  cancelReminderNotifications,
   requestNotificationPermission,
   openNotificationSettings,
   logDayConversionTable,
@@ -324,34 +322,8 @@ function ReminderForm({
       const minute = Number(form.minute);
 
       if (editingReminder) {
-        // Eski bildirimleri iptal et
-        await cancelReminderNotifications(editingReminder.notificationIds);
-
-        // Yeni bildirimleri planla
-        const newIds = editingReminder.isActive
-          ? await scheduleReminderNotifications({
-              label: form.label.trim(),
-              category: form.category,
-              insulinColor: form.insulinColor,
-              hour,
-              minute,
-              daysOfWeek: form.daysOfWeek,
-            })
-          : [];
-
         await updateReminder({
           id: editingReminder.id,
-          label: form.label.trim(),
-          category: form.category,
-          insulinColor: form.insulinColor ?? undefined,
-          hour,
-          minute,
-          daysOfWeek: form.daysOfWeek,
-          notificationIds: newIds,
-        });
-      } else {
-        // Bildirim planla
-        const ids = await scheduleReminderNotifications({
           label: form.label.trim(),
           category: form.category,
           insulinColor: form.insulinColor,
@@ -359,15 +331,14 @@ function ReminderForm({
           minute,
           daysOfWeek: form.daysOfWeek,
         });
-
+      } else {
         await insertReminder({
           label: form.label.trim(),
           category: form.category,
-          insulinColor: form.insulinColor ?? undefined,
+          insulinColor: form.insulinColor,
           hour,
           minute,
           daysOfWeek: form.daysOfWeek,
-          notificationIds: ids,
         });
       }
 
@@ -772,16 +743,6 @@ export default function RemindersScreen() {
     logDayConversionTable();
   }, []);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    try {
-      const all = await getAllReminders();
-      setReminders(all);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
   const checkPermissions = useCallback(async () => {
     const result = await requestNotificationPermission();
     setPermState(result.state === "granted" ? "granted" : "denied");
@@ -790,31 +751,28 @@ export default function RemindersScreen() {
   useFocusEffect(
     useCallback(() => {
       checkPermissions();
-      load();
-    }, [checkPermissions, load])
+    }, [checkPermissions])
   );
+
+  // Canlı abonelik (Firestore onSnapshot)
+  useEffect(() => {
+    const unsubscribe = subscribeToReminders((list) => {
+      setReminders(list);
+      setLoading(false);
+    });
+    return unsubscribe;
+  }, []);
 
   const handleToggle = useCallback(
     async (reminder: Reminder, isActive: boolean) => {
       try {
-        let newIds: string[] = [];
-
-        if (isActive) {
-          // Yeniden planla
-          newIds = await scheduleReminderNotifications(reminder);
-        } else {
-          // İptal et
-          await cancelReminderNotifications(reminder.notificationIds);
-        }
-
-        await setReminderActive(reminder.id, isActive, newIds);
-        await load();
+        await setReminderActive(reminder.id, isActive);
       } catch (err) {
         console.error("Toggle hatası:", err);
         Alert.alert("Hata", "Hatırlatma güncellenemedi.");
       }
     },
-    [load]
+    []
   );
 
   const handleDelete = useCallback(
@@ -829,9 +787,7 @@ export default function RemindersScreen() {
             style: "destructive",
             onPress: async () => {
               try {
-                await cancelReminderNotifications(reminder.notificationIds);
                 await deleteReminder(reminder.id);
-                await load();
               } catch (err) {
                 Alert.alert("Hata", "Silme işlemi başarısız.");
               }
@@ -840,7 +796,7 @@ export default function RemindersScreen() {
         ]
       );
     },
-    [load]
+    []
   );
 
   const handleEdit = useCallback((reminder: Reminder) => {
@@ -859,8 +815,8 @@ export default function RemindersScreen() {
   }, []);
 
   const handleFormSaved = useCallback(() => {
-    load();
-  }, [load]);
+    // onSnapshot otomatik günceller
+  }, []);
 
   return (
     <View style={styles.container}>

@@ -20,11 +20,15 @@ import {
   GlucoseMeasurement,
   BloodPressureMeasurement,
   DailyWater,
-  getGroupedHistory,
-  getGlucoseForChart,
-  getBPForChart,
-  getDailyWaterForChart,
-} from "@/db/queries";
+  Measurement,
+  WaterEntry,
+  subscribeToMeasurements,
+  subscribeToWaterLog,
+  groupMeasurementsAndWater,
+  getGlucoseForChartFromList,
+  getBPForChartFromList,
+  getDailyWaterForChartFromList,
+} from "@/db/firestoreQueries";
 import {
   formatDateKey,
   formatTime,
@@ -220,7 +224,7 @@ function DayCard({
   // Tüm kayıtları zamana göre sırala (ölçüm + su karışık)
   type AnyEntry =
     | { kind: "measurement"; data: GlucoseMeasurement | BloodPressureMeasurement }
-    | { kind: "water"; data: { id: number; recorded_at: string; water_ml: number } };
+    | { kind: "water"; data: WaterEntry };
 
   const allEntries: AnyEntry[] = [
     ...day.measurements.map((m) => ({ kind: "measurement" as const, data: m })),
@@ -387,30 +391,35 @@ type ChartDays = 7 | 30;
 
 function ChartTab() {
   const [days, setDays] = useState<ChartDays>(7);
-  const [glucose, setGlucose] = useState<GlucoseMeasurement[]>([]);
-  const [bp, setBp] = useState<BloodPressureMeasurement[]>([]);
-  const [water, setWater] = useState<DailyWater[]>([]);
+  const [measurements, setMeasurements] = useState<Measurement[]>([]);
+  const [waterEntries, setWaterEntries] = useState<WaterEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const load = useCallback(async (d: ChartDays) => {
-    setLoading(true);
-    try {
-      const [g, b, w] = await Promise.all([
-        getGlucoseForChart(d),
-        getBPForChart(d),
-        getDailyWaterForChart(d),
-      ]);
-      setGlucose(g);
-      setBp(b);
-      setWater(w);
-    } finally {
-      setLoading(false);
-    }
+  useEffect(() => {
+    let mDone = false;
+    let wDone = false;
+
+    const unsubM = subscribeToMeasurements((m) => {
+      setMeasurements(m);
+      mDone = true;
+      if (wDone) setLoading(false);
+    });
+
+    const unsubW = subscribeToWaterLog((w) => {
+      setWaterEntries(w);
+      wDone = true;
+      if (mDone) setLoading(false);
+    });
+
+    return () => {
+      unsubM();
+      unsubW();
+    };
   }, []);
 
-  useEffect(() => {
-    load(days);
-  }, [days, load]);
+  const glucose = getGlucoseForChartFromList(measurements, days);
+  const bp = getBPForChartFromList(measurements, days);
+  const water = getDailyWaterForChartFromList(waterEntries, days);
 
   const handleDaysChange = (d: ChartDays) => {
     setDays(d);
@@ -668,22 +677,34 @@ function ListTab() {
   const [days, setDays] = useState<DayEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    try {
-      const result = await getGroupedHistory(30);
-      setDays(result);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  useEffect(() => {
+    let currentMeasurements: Measurement[] = [];
+    let currentWater: WaterEntry[] = [];
+    let mLoaded = false;
+    let wLoaded = false;
 
-  // Ekrana her dönüşte yenile (yeni giriş yapılmış olabilir)
-  useFocusEffect(
-    useCallback(() => {
-      load();
-    }, [load])
-  );
+    const update = () => {
+      setDays(groupMeasurementsAndWater(currentMeasurements, currentWater, 30));
+      if (mLoaded && wLoaded) setLoading(false);
+    };
+
+    const unsubM = subscribeToMeasurements((m) => {
+      currentMeasurements = m;
+      mLoaded = true;
+      update();
+    });
+
+    const unsubW = subscribeToWaterLog((w) => {
+      currentWater = w;
+      wLoaded = true;
+      update();
+    });
+
+    return () => {
+      unsubM();
+      unsubW();
+    };
+  }, []);
 
   if (loading) {
     return (

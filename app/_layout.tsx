@@ -1,56 +1,62 @@
-import { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
-import { Tabs } from "expo-router";
+import { Tabs, useRouter, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 
-import { initDatabase } from "@/db/schema";
 import { Colors, FontSize } from "@/constants/theme";
 import { setupNotificationChannel } from "@/utils/notifications";
+import { AuthProvider, useAuth } from "@/context/AuthContext";
+import { subscribeToReminders } from "@/db/firestoreQueries";
+import { syncRemindersWithLocalNotifications } from "@/services/reminderSync";
 
+function AppNavigation() {
+  const { user, loading } = useAuth();
+  const segments = useSegments();
+  const router = useRouter();
 
-/**
- * Root layout — uygulamanın en dış katmanı.
- *
- * Görevleri:
- * 1. SQLite veritabanını başlatır (uygulama açılırken).
- * 2. Yükleme sırasında splash benzeri bir ekran gösterir.
- * 3. expo-router Tabs navigasyonunu yapılandırır.
- *
- * Neden Tabs? MVP'de 4 sekme var (Giriş, Geçmiş, Hatırlatmalar, Dışa Aktar).
- * Alt sekme çubuğu yaşlı kullanıcı için en sezgisel navigasyon yöntemi.
- */
-export default function RootLayout() {
-  const [dbReady, setDbReady] = useState(false);
-  const [dbError, setDbError] = useState<string | null>(null);
-
+  // Android bildirim kanalını başlat
   useEffect(() => {
-    Promise.all([
-      initDatabase(),
-      setupNotificationChannel(), // Android bildirim kanalı — iOS'ta no-op
-    ])
-      .then(() => setDbReady(true))
-      .catch((err) => {
-        console.error("Başlatma hatası:", err);
-        setDbError("Uygulama başlatılamadı. Lütfen yeniden deneyin.");
-      });
+    setupNotificationChannel().catch((err) => {
+      console.error("Bildirim kanalı kurulamadı:", err);
+    });
   }, []);
 
-  // Yükleme ekranı
-  if (!dbReady && !dbError) {
+  // Hatırlatma arka plan canlı senkronu (kullanıcı giriş yapmışsa aktif)
+  useEffect(() => {
+    if (!user) return;
+
+    const unsubscribe = subscribeToReminders((reminders) => {
+      syncRemindersWithLocalNotifications(reminders).catch((err) => {
+        console.error("Hatırlatma canlı senkron hatası:", err);
+      });
+    });
+
+    return unsubscribe;
+  }, [user]);
+
+  // Kimlik doğrulama yönlendirme koruması
+  useEffect(() => {
+    if (loading) return;
+
+    const inLogin = segments[0] === "login";
+
+    if (!user && !inLogin) {
+      router.replace("/login");
+    } else if (user && inLogin) {
+      router.replace("/");
+    }
+  }, [user, loading, segments, router]);
+
+  // Yükleme ekranı (oturum durumu belirlenene kadar)
+  if (loading) {
     return (
       <View style={styles.splash}>
         <Text style={styles.splashTitle}>Sağlık Takip</Text>
-        <ActivityIndicator color={Colors.primary} size="large" style={{ marginTop: 24 }} />
-      </View>
-    );
-  }
-
-  // Kritik hata ekranı
-  if (dbError) {
-    return (
-      <View style={styles.splash}>
-        <Text style={styles.errorTitle}>⚠ Hata</Text>
-        <Text style={styles.errorText}>{dbError}</Text>
+        <ActivityIndicator
+          color={Colors.primary}
+          size="large"
+          style={{ marginTop: 24 }}
+        />
       </View>
     );
   }
@@ -60,7 +66,6 @@ export default function RootLayout() {
       <StatusBar style="light" />
       <Tabs
         screenOptions={{
-          // Tab bar görünümü
           tabBarStyle: {
             backgroundColor: Colors.surface,
             borderTopColor: Colors.border,
@@ -75,7 +80,6 @@ export default function RootLayout() {
             fontSize: FontSize.xs,
             fontWeight: "600",
           },
-          // Header görünümü
           headerStyle: { backgroundColor: Colors.background },
           headerTintColor: Colors.textPrimary,
           headerTitleStyle: {
@@ -125,8 +129,24 @@ export default function RootLayout() {
             ),
           }}
         />
+        <Tabs.Screen
+          name="login"
+          options={{
+            href: null,
+            headerShown: false,
+            tabBarStyle: { display: "none" },
+          }}
+        />
       </Tabs>
     </>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <AuthProvider>
+      <AppNavigation />
+    </AuthProvider>
   );
 }
 
@@ -142,17 +162,5 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: "800",
     color: Colors.textPrimary,
-  },
-  errorTitle: {
-    fontSize: 28,
-    fontWeight: "700",
-    color: Colors.danger,
-    marginBottom: 16,
-  },
-  errorText: {
-    fontSize: FontSize.md,
-    color: Colors.textSecondary,
-    textAlign: "center",
-    lineHeight: 28,
   },
 });

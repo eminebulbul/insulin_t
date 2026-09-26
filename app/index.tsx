@@ -15,7 +15,7 @@ import { useFocusEffect } from "expo-router";
 
 import { Colors, FontSize, Spacing, Radius } from "@/constants/theme";
 import { BigButton } from "@/components/BigButton";
-import { insertGlucose, insertBloodPressure, insertWater, MealTag } from "@/db/queries";
+import { insertGlucose, insertBloodPressure, insertWater, MealTag } from "@/db/firestoreQueries";
 import { validateGlucose, validateBloodPressure } from "@/utils/validation";
 import {
   resolveRecordedAt,

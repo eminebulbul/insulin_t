@@ -1,4 +1,4 @@
-import { MealTag } from "../db/queries";
+import { MealTag } from "../db/firestoreQueries";
 
 /** "2026-09-25" → "25 Eylül 2026, Perşembe" */
 export function formatDateKey(dateKey: string): string {

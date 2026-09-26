@@ -1,6 +1,6 @@
 import * as FileSystem from "expo-file-system/legacy";
 import * as Sharing from "expo-sharing";
-import { getAllMeasurements, getAllWaterEntries, Measurement } from "../db/queries";
+import { getAllMeasurements, getAllWaterEntries, Measurement } from "../db/firestoreQueries";
 
 // ─── JSON Yedek ───────────────────────────────────────────────────────────────
 

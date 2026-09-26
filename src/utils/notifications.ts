@@ -1,6 +1,6 @@
 import * as Notifications from "expo-notifications";
 import { Platform, Linking } from "react-native";
-import { Reminder } from "../db/reminderQueries";
+import { Reminder } from "../db/firestoreQueries";
 
 // ─── Bildirim handler (uygulama öndeyken de göster) ──────────────────────────
 
@@ -33,7 +33,6 @@ export async function setupNotificationChannel(): Promise<void> {
     name: "Sağlık Hatırlatmaları",
     description: "İnsülin ve ölçüm hatırlatmaları",
     importance: Notifications.AndroidImportance.MAX,
-    sound: "default",
     vibrationPattern: [0, 250, 250, 250],
     enableLights: true,
     lightColor: "#58A6FF",
