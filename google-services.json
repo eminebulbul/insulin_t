@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "920350144765",
+    "project_id": "insulin-takip",
+    "storage_bucket": "insulin-takip.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:920350144765:android:2d5a263c0fea628c1be694",
+        "android_client_info": {
+          "package_name": "com.aile.sagliktakip"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "920350144765-q3padou6nsjvs8m89k1pipog2ko00b0q.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAk4eFmL459Ewjtp6W4z1iFCGAmoMcKXZA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "920350144765-q3padou6nsjvs8m89k1pipog2ko00b0q.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
