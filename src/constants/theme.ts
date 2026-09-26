@@ -32,15 +32,15 @@ export const Colors = {
   tagUnselectedText: "#8B949E",
 };
 
-// Font boyutları — yaşlı kullanıcı için büyük
+// Font boyutları — normalize taban değerler (FontSizeContext çarpanı ile ölçeklenir)
 export const FontSize = {
-  xs: 14,
-  sm: 16,
-  md: 20,    // Minimum kullanılabilir boyut
-  lg: 24,
-  xl: 28,
-  xxl: 36,
-  display: 48,
+  xs: 12,
+  sm: 14,
+  md: 16,
+  lg: 20,
+  xl: 24,
+  xxl: 30,
+  display: 38,
 };
 
 // Boşluklar

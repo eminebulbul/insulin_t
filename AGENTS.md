@@ -92,6 +92,10 @@ kontrast koyu tema, sade Türkçe arayüz.
   gerçekten değişiklik olup olmadığını kontrol etmeden bildirimi yeniden
   kurma, çift bildirim riski var
 
+## Font Ölçekleme Kuralı
+- Projede ASLA ham `Text`/`TextInput` (react-native'den) kullanılmaz, her zaman `src/components/AppText.tsx` ve `AppTextInput.tsx` kullanılır.
+- Her AppText çağrısında fontSize açıkça belirtilmeli (theme.ts token'ları üzerinden) — belirtilmezse font ölçekleme çarpanı uygulanamaz.
+
 ## Çalışma Kuralları
 - Bir seferde sadece istenen faz/dosyalar değiştirilir. Kapsam dışına
   çıkmak gerekiyorsa yapmadan önce sor.
@@ -107,6 +111,7 @@ kontrast koyu tema, sade Türkçe arayüz.
 3.5. Bulut senkronizasyonu (Firestore, canlı senkron) ✅ tamamlandı
 4. PDF/paylaşılabilir doktor özeti ✅ tamamlandı
 4.5. Ölçüm kayıtlarını düzenleme ve silme ✅ tamamlandı
+4.6. Uygulama içi font boyutu ayarı (AppText/AppTextInput, 4 seviye) ✅ tamamlandı
 5. Sadeleştirme turu + gerçek kullanıcı testi — henüz yapılmadı
 6. Dağıtım (4 telefona APK) 🔄 şu an bunun üzerinde çalışılıyor
 

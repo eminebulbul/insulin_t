@@ -1,14 +1,12 @@
 import React, { useState, useCallback, useEffect } from "react";
 import {
   View,
-  Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
   Switch,
   Alert,
   Modal,
-  TextInput,
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
@@ -18,6 +16,8 @@ import { useFocusEffect } from "expo-router";
 
 import { Colors, FontSize, Spacing, Radius } from "@/constants/theme";
 import { BigButton } from "@/components/BigButton";
+import { AppText } from "@/components/AppText";
+import { AppTextInput } from "@/components/AppTextInput";
 import {
   Reminder,
   ReminderCategory,
@@ -49,24 +49,24 @@ function PermissionBanner({
   const isExact = type === "exact_alarm";
   return (
     <View style={bannerStyles.container}>
-      <Text style={bannerStyles.icon}>{isExact ? "⏰" : "🔕"}</Text>
+      <AppText style={bannerStyles.icon}>{isExact ? "⏰" : "🔕"}</AppText>
       <View style={{ flex: 1 }}>
-        <Text style={bannerStyles.title}>
+        <AppText style={bannerStyles.title}>
           {isExact
             ? "Kesin zamanlı hatırlatma için izin gerekli"
             : "Bildirimler kapalı"}
-        </Text>
-        <Text style={bannerStyles.desc}>
+        </AppText>
+        <AppText style={bannerStyles.desc}>
           {isExact
             ? "Android 12+ için kesin alarm izni Ayarlar'dan açılmalı."
             : "Hatırlatmaların çalışması için bildirim iznine ihtiyaç var."}
-        </Text>
+        </AppText>
         <TouchableOpacity
           style={bannerStyles.btn}
           onPress={openNotificationSettings}
           activeOpacity={0.75}
         >
-          <Text style={bannerStyles.btnText}>Ayarları Aç</Text>
+          <AppText style={bannerStyles.btnText}>Ayarları Aç</AppText>
         </TouchableOpacity>
       </View>
     </View>
@@ -135,14 +135,14 @@ function ReminderRow({ item, onToggle, onEdit, onDelete }: ReminderRowProps) {
 
   return (
     <View style={rowStyles.card}>
-      <Text style={rowStyles.icon}>{icon}</Text>
-      <View style={{ flex: 1 }}>
-        <Text style={rowStyles.label} numberOfLines={1}>
+      <AppText style={rowStyles.icon}>{icon}</AppText>
+      <View style={{ flex: 1, paddingRight: Spacing.xs }}>
+        <AppText style={rowStyles.label} numberOfLines={2}>
           {item.label}
-        </Text>
-        <Text style={rowStyles.meta}>
+        </AppText>
+        <AppText style={rowStyles.meta}>
           {hourStr}:{minStr} · {dayLabel}
-        </Text>
+        </AppText>
       </View>
       <View style={rowStyles.actions}>
         <TouchableOpacity
@@ -150,7 +150,7 @@ function ReminderRow({ item, onToggle, onEdit, onDelete }: ReminderRowProps) {
           style={rowStyles.editBtn}
           accessibilityLabel={`${item.label} düzenle`}
         >
-          <Text style={rowStyles.editIcon}>✏️</Text>
+          <AppText style={rowStyles.editIcon}>✏️</AppText>
         </TouchableOpacity>
         <Switch
           value={item.isActive}
@@ -164,12 +164,13 @@ function ReminderRow({ item, onToggle, onEdit, onDelete }: ReminderRowProps) {
           style={rowStyles.deleteBtn}
           accessibilityLabel={`${item.label} sil`}
         >
-          <Text style={rowStyles.deleteIcon}>🗑</Text>
+          <AppText style={rowStyles.deleteIcon}>🗑</AppText>
         </TouchableOpacity>
       </View>
     </View>
   );
 }
+
 
 const rowStyles = StyleSheet.create({
   card: {
@@ -368,11 +369,11 @@ function ReminderForm({
         {/* Header */}
         <View style={formStyles.header}>
           <TouchableOpacity onPress={onClose} style={formStyles.cancelBtn}>
-            <Text style={formStyles.cancelText}>İptal</Text>
+            <AppText style={formStyles.cancelText}>İptal</AppText>
           </TouchableOpacity>
-          <Text style={formStyles.title}>
+          <AppText style={formStyles.title}>
             {editingReminder ? "Düzenle" : "Yeni Hatırlatma"}
-          </Text>
+          </AppText>
           <View style={{ width: 56 }} />
         </View>
 
@@ -382,7 +383,7 @@ function ReminderForm({
           keyboardShouldPersistTaps="handled"
         >
           {/* Kategori */}
-          <Text style={formStyles.sectionLabel}>Kategori</Text>
+          <AppText style={formStyles.sectionLabel}>Kategori</AppText>
           <View style={formStyles.segmentRow}>
             {(["measurement", "insulin"] as ReminderCategory[]).map((cat) => (
               <TouchableOpacity
@@ -397,17 +398,17 @@ function ReminderForm({
                 }}
                 activeOpacity={0.75}
               >
-                <Text style={formStyles.segmentIcon}>
+                <AppText style={formStyles.segmentIcon}>
                   {cat === "measurement" ? "🩸" : "💉"}
-                </Text>
-                <Text
+                </AppText>
+                <AppText
                   style={[
                     formStyles.segmentText,
                     form.category === cat && formStyles.segmentTextActive,
                   ]}
                 >
                   {cat === "measurement" ? "Ölçüm" : "İnsülin"}
-                </Text>
+                </AppText>
               </TouchableOpacity>
             ))}
           </View>
@@ -415,10 +416,10 @@ function ReminderForm({
           {/* İnsülin rengi (sadece insulin seçiliyse) */}
           {form.category === "insulin" && (
             <>
-              <Text style={formStyles.sectionLabel}>
+              <AppText style={formStyles.sectionLabel}>
                 İnsülin Rengi{" "}
-                <Text style={{ color: Colors.danger }}>*</Text>
-              </Text>
+                <AppText style={{ color: Colors.danger }}>*</AppText>
+              </AppText>
               <View style={formStyles.segmentRow}>
                 {(["turuncu", "gri"] as InsulinColor[]).map((color) => (
                   <TouchableOpacity
@@ -431,10 +432,10 @@ function ReminderForm({
                     onPress={() => setField("insulinColor", color)}
                     activeOpacity={0.75}
                   >
-                    <Text style={{ fontSize: 28 }}>
+                    <AppText style={{ fontSize: 28 }}>
                       {color === "turuncu" ? "🟠" : "⚫"}
-                    </Text>
-                    <Text
+                    </AppText>
+                    <AppText
                       style={[
                         formStyles.segmentText,
                         form.insulinColor === color &&
@@ -442,19 +443,19 @@ function ReminderForm({
                       ]}
                     >
                       {color === "turuncu" ? "Turuncu" : "Gri"}
-                    </Text>
+                    </AppText>
                   </TouchableOpacity>
                 ))}
               </View>
               {errors.insulinColor && (
-                <Text style={formStyles.errorText}>{errors.insulinColor}</Text>
+                <AppText style={formStyles.errorText}>{errors.insulinColor}</AppText>
               )}
             </>
           )}
 
           {/* Etiket */}
-          <Text style={formStyles.sectionLabel}>Etiket</Text>
-          <TextInput
+          <AppText style={formStyles.sectionLabel}>Etiket</AppText>
+          <AppTextInput
             style={[formStyles.input, errors.label ? formStyles.inputError : {}]}
             value={form.label}
             onChangeText={(t) => setField("label", t)}
@@ -464,13 +465,13 @@ function ReminderForm({
             returnKeyType="done"
           />
           {errors.label && (
-            <Text style={formStyles.errorText}>{errors.label}</Text>
+            <AppText style={formStyles.errorText}>{errors.label}</AppText>
           )}
 
           {/* Saat */}
-          <Text style={formStyles.sectionLabel}>Saat</Text>
+          <AppText style={formStyles.sectionLabel}>Saat</AppText>
           <View style={formStyles.timeRow}>
-            <TextInput
+            <AppTextInput
               style={[
                 formStyles.timeInput,
                 errors.time ? formStyles.inputError : {},
@@ -483,8 +484,8 @@ function ReminderForm({
               maxLength={2}
               accessibilityLabel="Saat"
             />
-            <Text style={formStyles.timeSep}>:</Text>
-            <TextInput
+            <AppText style={formStyles.timeSep}>:</AppText>
+            <AppTextInput
               style={[
                 formStyles.timeInput,
                 errors.time ? formStyles.inputError : {},
@@ -499,11 +500,11 @@ function ReminderForm({
             />
           </View>
           {errors.time && (
-            <Text style={formStyles.errorText}>{errors.time}</Text>
+            <AppText style={formStyles.errorText}>{errors.time}</AppText>
           )}
 
           {/* Günler */}
-          <Text style={formStyles.sectionLabel}>Günler</Text>
+          <AppText style={formStyles.sectionLabel}>Günler</AppText>
           <TouchableOpacity
             style={[
               formStyles.everyDayBtn,
@@ -512,14 +513,14 @@ function ReminderForm({
             onPress={toggleAllDays}
             activeOpacity={0.75}
           >
-            <Text
+            <AppText
               style={[
                 formStyles.everyDayText,
                 isEveryDay && formStyles.everyDayTextActive,
               ]}
             >
               Her Gün
-            </Text>
+            </AppText>
           </TouchableOpacity>
 
           <View style={formStyles.daysRow}>
@@ -536,21 +537,22 @@ function ReminderForm({
                   activeOpacity={0.75}
                   accessibilityLabel={`${TR_DAYS[day - 1]} ${selected ? "seçili" : "seçili değil"}`}
                 >
-                  <Text
+                  <AppText
                     style={[
                       formStyles.dayBtnText,
                       selected && formStyles.dayBtnTextActive,
                     ]}
                   >
                     {TR_DAYS[day - 1]}
-                  </Text>
+                  </AppText>
                 </TouchableOpacity>
               );
             })}
           </View>
           {errors.daysOfWeek && (
-            <Text style={formStyles.errorText}>{errors.daysOfWeek}</Text>
+            <AppText style={formStyles.errorText}>{errors.daysOfWeek}</AppText>
           )}
+
 
           <BigButton
             title={editingReminder ? "Güncelle" : "Kaydet"}
@@ -840,11 +842,11 @@ export default function RemindersScreen() {
         ) : reminders.length === 0 ? (
           /* Boş durum */
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyIcon}>🔔</Text>
-            <Text style={styles.emptyTitle}>Hatırlatma yok</Text>
-            <Text style={styles.emptyHint}>
+            <AppText style={styles.emptyIcon}>🔔</AppText>
+            <AppText style={styles.emptyTitle}>Hatırlatma yok</AppText>
+            <AppText style={styles.emptyHint}>
               Sağ alttaki ➕ butonuna basarak yeni hatırlatma ekleyin.
-            </Text>
+            </AppText>
           </View>
         ) : (
           reminders.map((r) => (
@@ -866,7 +868,7 @@ export default function RemindersScreen() {
         activeOpacity={0.85}
         accessibilityLabel="Yeni hatırlatma ekle"
       >
-        <Text style={styles.fabIcon}>➕</Text>
+        <AppText style={styles.fabIcon}>➕</AppText>
       </TouchableOpacity>
 
       {/* Form Modal */}

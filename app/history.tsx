@@ -1,7 +1,6 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
 import {
   View,
-  Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
@@ -11,6 +10,7 @@ import {
   UIManager,
   Dimensions,
 } from "react-native";
+import { AppText } from "@/components/AppText";
 import { useFocusEffect } from "expo-router";
 import { LineChart, BarChart } from "react-native-chart-kit";
 
@@ -69,11 +69,11 @@ function TopTabBar({
           onPress={() => onChange(t)}
           activeOpacity={0.75}
         >
-          <Text
+          <AppText
             style={[tabStyles.label, active === t && tabStyles.activeLabel]}
           >
             {t === "liste" ? "📋 Liste" : "📈 Grafik"}
-          </Text>
+          </AppText>
         </TouchableOpacity>
       ))}
     </View>
@@ -136,27 +136,27 @@ function MeasurementRow({
       accessibilityRole="button"
       accessibilityLabel={`${isGlucose ? "Şeker" : "Tansiyon"} kaydı: ${valueText}, düzenlemek veya silmek için dokunun`}
     >
-      <Text style={rowStyles.icon}>{icon}</Text>
+      <AppText style={rowStyles.icon}>{icon}</AppText>
       <View style={rowStyles.meta}>
-        <Text style={rowStyles.time}>{time}</Text>
+        <AppText style={rowStyles.time}>{time}</AppText>
         {mealLabel ? (
-          <Text style={rowStyles.tag}>{mealLabel}</Text>
+          <AppText style={rowStyles.tag}>{mealLabel}</AppText>
         ) : null}
       </View>
       <View style={rowStyles.valueBox}>
-        <Text
+        <AppText
           style={[
             rowStyles.value,
             { color: isGlucose ? Colors.glucose : Colors.bloodPressure },
           ]}
         >
           {valueText}
-        </Text>
+        </AppText>
         {noteText ? (
-          <Text style={rowStyles.note}>{noteText}</Text>
+          <AppText style={rowStyles.note}>{noteText}</AppText>
         ) : null}
       </View>
-      <Text style={rowStyles.chevron}>›</Text>
+      <AppText style={rowStyles.chevron}>›</AppText>
     </TouchableOpacity>
   );
 }
@@ -178,14 +178,14 @@ function WaterRow({
       accessibilityRole="button"
       accessibilityLabel={`Su kaydı: ${ml} ml, düzenlemek veya silmek için dokunun`}
     >
-      <Text style={rowStyles.icon}>💧</Text>
+      <AppText style={rowStyles.icon}>💧</AppText>
       <View style={rowStyles.meta}>
-        <Text style={rowStyles.time}>{formatTime(isoTime)}</Text>
+        <AppText style={rowStyles.time}>{formatTime(isoTime)}</AppText>
       </View>
       <View style={rowStyles.valueBox}>
-        <Text style={[rowStyles.value, { color: "#58A6FF" }]}>{ml} ml</Text>
+        <AppText style={[rowStyles.value, { color: "#58A6FF" }]}>{ml} ml</AppText>
       </View>
-      <Text style={rowStyles.chevron}>›</Text>
+      <AppText style={rowStyles.chevron}>›</AppText>
     </TouchableOpacity>
   );
 }
@@ -281,19 +281,19 @@ function DayCard({
         accessibilityLabel={`${formatDateKey(day.dateKey)}, ${open ? "kapat" : "aç"}`}
       >
         <View style={dayStyles.headerLeft}>
-          <Text style={dayStyles.chevron}>{open ? "▼" : "›"}</Text>
+          <AppText style={dayStyles.chevron}>{open ? "▼" : "›"}</AppText>
           <View>
-            <Text style={dayStyles.dateText}>{formatDateKey(day.dateKey)}</Text>
-            <Text style={dayStyles.relLabel}>{relLabel}</Text>
+            <AppText style={dayStyles.dateText}>{formatDateKey(day.dateKey)}</AppText>
+            <AppText style={dayStyles.relLabel}>{relLabel}</AppText>
           </View>
         </View>
         <View style={dayStyles.summary}>
           {avgGlucose !== null && (
-            <Text style={dayStyles.summaryText}>
-              <Text style={{ color: Colors.glucose }}>●</Text> Ort: {avgGlucose} mg/dL
-            </Text>
+            <AppText style={dayStyles.summaryText}>
+              <AppText style={{ color: Colors.glucose }}>●</AppText> Ort: {avgGlucose} mg/dL
+            </AppText>
           )}
-          <Text style={dayStyles.summaryCount}>{totalCount} kayıt</Text>
+          <AppText style={dayStyles.summaryCount}>{totalCount} kayıt</AppText>
         </View>
       </TouchableOpacity>
 
@@ -301,7 +301,7 @@ function DayCard({
       {open && (
         <View style={dayStyles.body}>
           {allEntries.length === 0 ? (
-            <Text style={dayStyles.empty}>Bu gün kayıt yok.</Text>
+            <AppText style={dayStyles.empty}>Bu gün kayıt yok.</AppText>
           ) : (
             allEntries.map((entry) =>
               entry.kind === "measurement" ? (
@@ -323,13 +323,13 @@ function DayCard({
           {/* Gün özeti alt satır */}
           <View style={dayStyles.footer}>
             {glucoseCount > 0 && (
-              <Text style={dayStyles.footerChip}>🩸 {glucoseCount} şeker</Text>
+              <AppText style={dayStyles.footerChip}>🩸 {glucoseCount} şeker</AppText>
             )}
             {bpCount > 0 && (
-              <Text style={dayStyles.footerChip}>💊 {bpCount} tansiyon</Text>
+              <AppText style={dayStyles.footerChip}>💊 {bpCount} tansiyon</AppText>
             )}
             {waterTotal > 0 && (
-              <Text style={dayStyles.footerChip}>💧 {waterTotal} ml su</Text>
+              <AppText style={dayStyles.footerChip}>💧 {waterTotal} ml su</AppText>
             )}
           </View>
         </View>
@@ -520,14 +520,14 @@ function ChartTab() {
             ]}
             onPress={() => handleDaysChange(d)}
           >
-            <Text
+            <AppText
               style={[
                 chartStyles.filterLabel,
                 days === d && chartStyles.filterLabelActive,
               ]}
             >
               Son {d} gün
-            </Text>
+            </AppText>
           </TouchableOpacity>
         ))}
       </View>
@@ -540,7 +540,7 @@ function ChartTab() {
         <>
           {/* Şeker grafiği */}
           <View style={chartStyles.section}>
-            <Text style={chartStyles.sectionTitle}>🩸 Kan Şekeri</Text>
+            <AppText style={chartStyles.sectionTitle}>🩸 Kan Şekeri</AppText>
             {glucoseData ? (
               <>
                 <LineChart
@@ -565,9 +565,9 @@ function ChartTab() {
                 {/* Öğün renk açıklaması */}
                 <View style={chartStyles.legendRow}>
                   {["Açlık", "Tokluk", "Yatmadan Önce", "Diğer"].map((l) => (
-                    <Text key={l} style={chartStyles.legendItem}>
+                    <AppText key={l} style={chartStyles.legendItem}>
                       {l}
-                    </Text>
+                    </AppText>
                   ))}
                 </View>
               </>
@@ -578,7 +578,7 @@ function ChartTab() {
 
           {/* Tansiyon grafiği */}
           <View style={chartStyles.section}>
-            <Text style={chartStyles.sectionTitle}>💊 Tansiyon</Text>
+            <AppText style={chartStyles.sectionTitle}>💊 Tansiyon</AppText>
             {bpData ? (
               <>
                 <LineChart
@@ -595,14 +595,14 @@ function ChartTab() {
                   yAxisSuffix=" mmHg"
                 />
                 <View style={chartStyles.legendRow}>
-                  <Text style={[chartStyles.legendItem, { color: Colors.danger }]}>
+                  <AppText style={[chartStyles.legendItem, { color: Colors.danger }]}>
                     ── Sistolik (büyük)
-                  </Text>
-                  <Text
+                  </AppText>
+                  <AppText
                     style={[chartStyles.legendItem, { color: Colors.bloodPressure }]}
                   >
                     ── Diastolik (küçük)
-                  </Text>
+                  </AppText>
                 </View>
               </>
             ) : (
@@ -612,7 +612,7 @@ function ChartTab() {
 
           {/* Su bar chart */}
           <View style={chartStyles.section}>
-            <Text style={chartStyles.sectionTitle}>💧 Günlük Su</Text>
+            <AppText style={chartStyles.sectionTitle}>💧 Günlük Su</AppText>
             {waterData ? (
               <BarChart
                 data={waterData}
@@ -641,10 +641,11 @@ function ChartTab() {
 function EmptyChart({ message }: { message: string }) {
   return (
     <View style={chartStyles.emptyBox}>
-      <Text style={chartStyles.emptyText}>{message}</Text>
+      <AppText style={chartStyles.emptyText}>{message}</AppText>
     </View>
   );
 }
+
 
 const chartStyles = StyleSheet.create({
   filterRow: {
@@ -765,18 +766,18 @@ function ListTab({
   if (days.length === 0) {
     return (
       <View style={listStyles.emptyContainer}>
-        <Text style={listStyles.emptyIcon}>📋</Text>
-        <Text style={listStyles.emptyTitle}>Henüz kayıt yok</Text>
-        <Text style={listStyles.emptyHint}>
+        <AppText style={listStyles.emptyIcon}>📋</AppText>
+        <AppText style={listStyles.emptyTitle}>Henüz kayıt yok</AppText>
+        <AppText style={listStyles.emptyHint}>
           "Giriş" sekmesinden şeker veya tansiyon ölçümü ekleyin.
-        </Text>
+        </AppText>
       </View>
     );
   }
 
   return (
     <>
-      <Text style={listStyles.subtitle}>Son 30 günün kayıtları (düzenlemek için dokunun)</Text>
+      <AppText style={listStyles.subtitle}>Son 30 günün kayıtları (düzenlemek için dokunun)</AppText>
       {days.map((day, i) => (
         <DayCard
           key={day.dateKey}

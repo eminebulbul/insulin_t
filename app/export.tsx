@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import {
   View,
-  Text,
   StyleSheet,
   Alert,
   ScrollView,
@@ -12,8 +11,10 @@ import {
 import DateTimePicker, { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import { Colors, FontSize, Spacing, Radius } from "@/constants/theme";
 import { BigButton } from "@/components/BigButton";
+import { AppText } from "@/components/AppText";
 import { exportJSON, exportCSV } from "@/utils/export";
 import { useAuth } from "@/context/AuthContext";
+import { useFontSize, FontSizeLevel, FONT_LEVEL_LABELS } from "@/context/FontSizeContext";
 import {
   generateAndSharePdf,
   buildDateRange,
@@ -21,12 +22,15 @@ import {
 } from "@/utils/pdfExport";
 
 /**
- * Dışa Aktarma ve Ayarlar ekranı.
- * Firestore üzerindeki verileri JSON ve CSV olarak dışa aktarır.
- * Aile hesabından çıkış yapma seçeneği sunar.
+ * Ayarlar ve Dışa Aktarma ekranı.
+ * - Yazı boyutu (cihaza özel FontSizeContext ölçeklemesi)
+ * - PDF doktor özeti paylaşma
+ * - JSON ve CSV veri yedekleme
+ * - Aile hesabı oturum yönetimi
  */
 export default function ExportScreen() {
   const { user, signOut } = useAuth();
+  const { level: fontLevel, setLevel: setFontLevel, scale: fontScale } = useFontSize();
 
   // ── PDF özeti durumu
   const [preset, setPreset] = useState<DateRangePreset>("30");
@@ -98,26 +102,87 @@ export default function ExportScreen() {
     );
   }
 
+  const FONT_LEVELS: FontSizeLevel[] = ["small", "normal", "large", "extra_large"];
+
   return (
     <ScrollView
       style={styles.container}
       contentContainerStyle={styles.content}
       showsVerticalScrollIndicator={false}
     >
-      <Text style={styles.icon}>💾</Text>
-      <Text style={styles.title}>Veri & Hesap</Text>
-      <Text style={styles.description}>
-        Kayıtlarınızı telefonunuzda saklamak veya aile/doktor ile paylaşmak için
-        dışa aktarın.
-      </Text>
+      {/* ── 1. YAZI BOYUTU (GÖRÜNÜM AYARI) ── */}
+      <View style={styles.sectionCard}>
+        <AppText style={styles.sectionTitle}>👁️ Yazı Boyutu</AppText>
+        <AppText style={styles.sectionDesc}>
+          Uygulama yazı büyüklüğünü kendinize göre seçin. Sadece bu cihazda geçerlidir.
+        </AppText>
 
-      {/* ── DOKTOR PDF ÖZETİ ── */}
+        <View style={styles.fontGrid}>
+          {FONT_LEVELS.map((lvl) => {
+            const isSelected = fontLevel === lvl;
+            const info = FONT_LEVEL_LABELS[lvl];
+            return (
+              <TouchableOpacity
+                key={lvl}
+                style={[
+                  styles.fontBtn,
+                  isSelected && styles.fontBtnActive,
+                ]}
+                onPress={() => setFontLevel(lvl)}
+                activeOpacity={0.75}
+                accessibilityRole="button"
+                accessibilityLabel={`${info.title} yazı boyutu, ${isSelected ? "seçili" : "seçmek için dokunun"}`}
+              >
+                <AppText
+                  style={[
+                    styles.fontBtnTitle,
+                    isSelected && styles.fontBtnTitleActive,
+                  ]}
+                >
+                  {info.title}
+                </AppText>
+                <AppText
+                  style={[
+                    styles.fontBtnSub,
+                    isSelected && styles.fontBtnSubActive,
+                  ]}
+                >
+                  {info.subtitle}
+                </AppText>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+
+        {/* Canlı Önizleme Kutusu */}
+        <View style={styles.previewBox}>
+          <AppText style={styles.previewHeader}>Canlı Önizleme ({FONT_LEVEL_LABELS[fontLevel].title} - {fontScale}x)</AppText>
+          <View style={styles.previewRow}>
+            <AppText style={[styles.previewValue, { color: Colors.glucose }]}>
+              🩸 Şeker: 120 mg/dL
+            </AppText>
+            <AppText style={styles.previewTag}>Açlık</AppText>
+          </View>
+          <View style={styles.previewRow}>
+            <AppText style={[styles.previewValue, { color: Colors.bloodPressure }]}>
+              💊 Tansiyon: 120/80 mmHg
+            </AppText>
+          </View>
+          <View style={styles.previewRow}>
+            <AppText style={[styles.previewValue, { color: "#58A6FF" }]}>
+              💧 Su: 200 ml
+            </AppText>
+          </View>
+        </View>
+      </View>
+
+      {/* ── 2. DOKTOR PDF ÖZETİ ── */}
       <View style={styles.pdfCard}>
-        <Text style={styles.pdfCardTitle}>📋 Doktor PDF Özeti</Text>
-        <Text style={styles.pdfCardDesc}>
+        <AppText style={styles.pdfCardTitle}>📋 Doktor PDF Özeti</AppText>
+        <AppText style={styles.pdfCardDesc}>
           Seçilen aralıktaki ölçümler, su tüketimi ve hatırlatma planını
           A4 PDF olarak oluşturur.
-        </Text>
+        </AppText>
 
         {/* Hızlı aralık butonları */}
         <View style={styles.presetRow}>
@@ -127,8 +192,9 @@ export default function ExportScreen() {
               id={`preset-${p}`}
               style={[styles.presetBtn, preset === p && styles.presetBtnActive]}
               onPress={() => setPreset(p)}
+              activeOpacity={0.75}
             >
-              <Text
+              <AppText
                 style={[
                   styles.presetBtnText,
                   preset === p && styles.presetBtnTextActive,
@@ -140,37 +206,36 @@ export default function ExportScreen() {
                   ? "Son 30 gün"
                   : p === "90"
                   ? "Son 90 gün"
-                  : "Özel"}
-              </Text>
+                  : "Özel Aralık"}
+              </AppText>
             </TouchableOpacity>
           ))}
         </View>
 
-        {/* Özel aralık seçici */}
+        {/* Özel tarih seçiciler */}
         {preset === "custom" && (
           <View style={styles.customRange}>
             <View style={styles.customDateRow}>
-              <Text style={styles.customDateLabel}>Başlangıç:</Text>
+              <AppText style={styles.customDateLabel}>Başlangıç:</AppText>
               <TouchableOpacity
-                id="custom-from-btn"
                 style={styles.datePickerBtn}
                 onPress={() => setShowFromPicker(true)}
               >
-                <Text style={styles.datePickerBtnText}>
+                <AppText style={styles.datePickerBtnText}>
                   {customFrom.toLocaleDateString("tr-TR")}
-                </Text>
+                </AppText>
               </TouchableOpacity>
             </View>
+
             <View style={styles.customDateRow}>
-              <Text style={styles.customDateLabel}>Bitiş:</Text>
+              <AppText style={styles.customDateLabel}>Bitiş:</AppText>
               <TouchableOpacity
-                id="custom-to-btn"
                 style={styles.datePickerBtn}
                 onPress={() => setShowToPicker(true)}
               >
-                <Text style={styles.datePickerBtnText}>
+                <AppText style={styles.datePickerBtnText}>
                   {customTo.toLocaleDateString("tr-TR")}
-                </Text>
+                </AppText>
               </TouchableOpacity>
             </View>
           </View>
@@ -180,24 +245,33 @@ export default function ExportScreen() {
           <DateTimePicker
             value={customFrom}
             mode="date"
-            display={Platform.OS === "android" ? "default" : "spinner"}
+            display="spinner"
+            themeVariant="dark"
             maximumDate={customTo}
             onChange={(_: DateTimePickerEvent, date?: Date) => {
-              setShowFromPicker(false);
-              if (date) setCustomFrom(date);
+              if (Platform.OS === "android") setShowFromPicker(false);
+              if (date) {
+                date.setHours(0, 0, 0, 0);
+                setCustomFrom(date);
+              }
             }}
           />
         )}
+
         {showToPicker && (
           <DateTimePicker
             value={customTo}
             mode="date"
-            display={Platform.OS === "android" ? "default" : "spinner"}
+            display="spinner"
+            themeVariant="dark"
             minimumDate={customFrom}
             maximumDate={new Date()}
             onChange={(_: DateTimePickerEvent, date?: Date) => {
-              setShowToPicker(false);
-              if (date) setCustomTo(date);
+              if (Platform.OS === "android") setShowToPicker(false);
+              if (date) {
+                date.setHours(23, 59, 59, 999);
+                setCustomTo(date);
+              }
             }}
           />
         )}
@@ -205,7 +279,7 @@ export default function ExportScreen() {
         {pdfLoading ? (
           <View style={styles.pdfLoadingRow}>
             <ActivityIndicator color={Colors.primary} size="small" />
-            <Text style={styles.pdfLoadingText}>PDF hazırlanıyor…</Text>
+            <AppText style={styles.pdfLoadingText}>PDF hazırlanıyor...</AppText>
           </View>
         ) : (
           <BigButton
@@ -218,18 +292,17 @@ export default function ExportScreen() {
         )}
       </View>
 
-      {/* ── VERİ YEDEĞİ ── */}
+      {/* ── 3. VERİ YEDEĞİ ── */}
       <View style={styles.buttonGroup}>
-
         <BigButton
           title="📄 JSON Yedek Al"
           onPress={handleJSON}
           variant="secondary"
           size="lg"
         />
-        <Text style={styles.hint}>
+        <AppText style={styles.hint}>
           Tüm ölçüm ve su kayıtlarını ham veri olarak aktarır
-        </Text>
+        </AppText>
 
         <BigButton
           title="📊 CSV Olarak Aktar"
@@ -238,18 +311,18 @@ export default function ExportScreen() {
           size="lg"
           style={{ marginTop: Spacing.md }}
         />
-        <Text style={styles.hint}>
+        <AppText style={styles.hint}>
           Excel veya Google E-Tablolar ile açılabilir
-        </Text>
+        </AppText>
       </View>
 
       <View style={styles.infoBox}>
-        <Text style={styles.infoText}>
+        <AppText style={styles.infoText}>
           ☁️ Verileriniz Firebase bulutunda saklanmakta ve bağlı 4 cihazla anlık
           olarak senkronize edilmektedir.
-        </Text>
+        </AppText>
         {user?.email && (
-          <Text style={styles.emailText}>Aktif Hesap: {user.email}</Text>
+          <AppText style={styles.emailText}>Aktif Hesap: {user.email}</AppText>
         )}
       </View>
 
@@ -274,20 +347,98 @@ const styles = StyleSheet.create({
     padding: Spacing.xl,
     paddingBottom: Spacing.xxxl * 2,
   },
-  icon: { fontSize: 48, textAlign: "center", marginTop: Spacing.lg },
-  title: {
-    fontSize: FontSize.xl,
+  sectionCard: {
+    backgroundColor: Colors.surface,
+    borderRadius: Radius.lg,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    padding: Spacing.lg,
+    marginBottom: Spacing.xxl,
+  },
+  sectionTitle: {
+    fontSize: FontSize.lg,
+    fontWeight: "700",
+    color: Colors.textPrimary,
+    marginBottom: Spacing.xs,
+  },
+  sectionDesc: {
+    fontSize: FontSize.sm,
+    color: Colors.textSecondary,
+    lineHeight: 20,
+    marginBottom: Spacing.md,
+  },
+  fontGrid: {
+    flexDirection: "row",
+    gap: Spacing.sm,
+    marginBottom: Spacing.lg,
+  },
+  fontBtn: {
+    flex: 1,
+    minHeight: 56,
+    borderRadius: Radius.sm,
+    backgroundColor: Colors.surfaceAlt,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: Spacing.xs,
+  },
+  fontBtnActive: {
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
+  },
+  fontBtnTitle: {
+    fontSize: FontSize.sm,
     fontWeight: "700",
     color: Colors.textPrimary,
     textAlign: "center",
-    marginVertical: Spacing.md,
   },
-  description: {
+  fontBtnTitleActive: {
+    color: "#FFFFFF",
+  },
+  fontBtnSub: {
+    fontSize: FontSize.xs,
+    color: Colors.textDisabled,
+    marginTop: 2,
+  },
+  fontBtnSubActive: {
+    color: "rgba(255,255,255,0.85)",
+  },
+  previewBox: {
+    backgroundColor: Colors.surfaceAlt,
+    borderRadius: Radius.md,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    padding: Spacing.md,
+    gap: Spacing.xs,
+  },
+  previewHeader: {
+    fontSize: FontSize.xs,
+    color: Colors.textDisabled,
+    marginBottom: Spacing.xs,
+    fontWeight: "600",
+    textTransform: "uppercase",
+  },
+  previewRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: 2,
+    flexWrap: "wrap",
+  },
+  previewValue: {
     fontSize: FontSize.md,
+    fontWeight: "700",
+  },
+  previewTag: {
+    fontSize: FontSize.xs,
     color: Colors.textSecondary,
-    textAlign: "center",
-    lineHeight: 26,
-    marginBottom: Spacing.xxl,
+    backgroundColor: Colors.surface,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 2,
+    borderRadius: Radius.sm,
+    borderWidth: 1,
+    borderColor: Colors.border,
   },
   buttonGroup: { gap: Spacing.sm },
   hint: {
@@ -405,4 +556,3 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
   },
 });
-

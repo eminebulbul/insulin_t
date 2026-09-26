@@ -1,13 +1,13 @@
 import React from "react";
 import {
   TouchableOpacity,
-  Text,
   StyleSheet,
   ViewStyle,
   TextStyle,
   ActivityIndicator,
 } from "react-native";
 import { Colors, FontSize, Radius, ButtonHeight } from "@/constants/theme";
+import { AppText } from "@/components/AppText";
 
 interface BigButtonProps {
   title: string;
@@ -58,15 +58,14 @@ export function BigButton({
       activeOpacity={0.75}
       accessibilityRole="button"
       accessibilityLabel={title}
-      accessibilityState={{ disabled: disabled || loading }}
     >
       {loading ? (
         <ActivityIndicator
-          color={variant === "primary" ? "#FFF" : Colors.primary}
+          color={variant === "secondary" || variant === "ghost" ? Colors.primary : "#FFFFFF"}
           size="small"
         />
       ) : (
-        <Text style={textStyle}>{title}</Text>
+        <AppText style={textStyle}>{title}</AppText>
       )}
     </TouchableOpacity>
   );
@@ -78,12 +77,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     flexDirection: "row",
+    paddingVertical: 10,
   },
 
-  // Boyutlar
-  size_sm: { height: ButtonHeight.sm, paddingHorizontal: 16 },
-  size_md: { height: ButtonHeight.md, paddingHorizontal: 20 },
-  size_lg: { height: ButtonHeight.lg, paddingHorizontal: 24 },
+  // Boyutlar (minHeight sayesinde ekstra büyük fontlarda buton esner, yazı kırpılmaz)
+  size_sm: { minHeight: ButtonHeight.sm, paddingHorizontal: 16 },
+  size_md: { minHeight: ButtonHeight.md, paddingHorizontal: 20 },
+  size_lg: { minHeight: ButtonHeight.lg, paddingHorizontal: 24 },
 
   // Varyantlar
   variant_primary: { backgroundColor: Colors.primary },
@@ -102,7 +102,12 @@ const styles = StyleSheet.create({
   disabled: { opacity: 0.4 },
 
   // Metin boyutları
-  text: { fontWeight: "700", letterSpacing: 0.3 },
+  text: {
+    fontWeight: "700",
+    letterSpacing: 0.3,
+    textAlign: "center",
+    flexShrink: 1,
+  },
   textSize_sm: { fontSize: FontSize.sm },
   textSize_md: { fontSize: FontSize.md },
   textSize_lg: { fontSize: FontSize.lg },

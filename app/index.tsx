@@ -1,8 +1,6 @@
 import React, { useState, useCallback } from "react";
 import {
   View,
-  Text,
-  TextInput,
   StyleSheet,
   ScrollView,
   Alert,
@@ -15,6 +13,8 @@ import { useFocusEffect } from "expo-router";
 
 import { Colors, FontSize, Spacing, Radius } from "@/constants/theme";
 import { BigButton } from "@/components/BigButton";
+import { AppText } from "@/components/AppText";
+import { AppTextInput } from "@/components/AppTextInput";
 import { insertGlucose, insertBloodPressure, insertWater, MealTag } from "@/db/firestoreQueries";
 import { validateGlucose, validateBloodPressure } from "@/utils/validation";
 import {
@@ -62,16 +62,16 @@ function TimePickerRow({
         activeOpacity={0.75}
         accessibilityLabel={`Ölçüm saatini değiştir, şu an seçili: ${displayLabel}`}
       >
-        <Text style={tpStyles.clock}>🕐</Text>
+        <AppText style={tpStyles.clock}>🕐</AppText>
         <View>
-          <Text style={tpStyles.label}>{displayLabel}</Text>
+          <AppText style={tpStyles.label}>{displayLabel}</AppText>
           {isYesterday && (
-            <Text style={tpStyles.warningText}>
+            <AppText style={tpStyles.warningText}>
               ⚠ Seçilen saat şu andan ileride — dünün tarihi kullanılacak
-            </Text>
+            </AppText>
           )}
         </View>
-        <Text style={tpStyles.chevron}>›</Text>
+        <AppText style={tpStyles.chevron}>›</AppText>
       </TouchableOpacity>
 
       {showPicker && (
@@ -220,8 +220,8 @@ function GlucoseCard({ onSaved }: GlucoseCardProps) {
     <View style={cardStyles.card}>
       {/* Başlık */}
       <View style={cardStyles.header}>
-        <Text style={[cardStyles.dot, { backgroundColor: Colors.glucose }]} />
-        <Text style={cardStyles.title}>🩸 Şeker</Text>
+        <View style={[cardStyles.dot, { backgroundColor: Colors.glucose }]} />
+        <AppText style={cardStyles.title}>🩸 Şeker</AppText>
       </View>
 
       {/* Saat seçici */}
@@ -233,7 +233,7 @@ function GlucoseCard({ onSaved }: GlucoseCardProps) {
       />
 
       {/* Meal tag seçimi */}
-      <Text style={cardStyles.label}>Ölçüm zamanı</Text>
+      <AppText style={cardStyles.label}>Ölçüm zamanı</AppText>
       <View style={cardStyles.tagRow}>
         {MEAL_TAGS.map((tag) => (
           <TouchableOpacity
@@ -247,22 +247,22 @@ function GlucoseCard({ onSaved }: GlucoseCardProps) {
             accessibilityLabel={tag.label}
             accessibilityState={{ selected: mealTag === tag.value }}
           >
-            <Text
+            <AppText
               style={[
                 cardStyles.tagText,
                 mealTag === tag.value && cardStyles.tagTextSelected,
               ]}
             >
               {tag.label}
-            </Text>
+            </AppText>
           </TouchableOpacity>
         ))}
       </View>
 
       {/* Şeker değeri girişi */}
-      <Text style={cardStyles.label}>Şeker değeri (mg/dL)</Text>
+      <AppText style={cardStyles.label}>Şeker değeri (mg/dL)</AppText>
       <View style={cardStyles.inputRow}>
-        <TextInput
+        <AppTextInput
           style={[cardStyles.input, fieldError ? cardStyles.inputError : {}]}
           value={glucoseValue}
           onChangeText={(t) => {
@@ -275,13 +275,13 @@ function GlucoseCard({ onSaved }: GlucoseCardProps) {
           maxLength={4}
           accessibilityLabel="Şeker değeri"
         />
-        <Text style={cardStyles.unit}>mg/dL</Text>
+        <AppText style={cardStyles.unit}>mg/dL</AppText>
       </View>
-      {fieldError && <Text style={cardStyles.errorText}>{fieldError}</Text>}
+      {fieldError && <AppText style={cardStyles.errorText}>{fieldError}</AppText>}
 
       {/* Not */}
-      <Text style={cardStyles.label}>Not (isteğe bağlı)</Text>
-      <TextInput
+      <AppText style={cardStyles.label}>Not (isteğe bağlı)</AppText>
+      <AppTextInput
         style={cardStyles.noteInput}
         value={note}
         onChangeText={setNote}
@@ -390,10 +390,10 @@ function BloodPressureCard({ onSaved }: BloodPressureCardProps) {
     <View style={cardStyles.card}>
       {/* Başlık */}
       <View style={cardStyles.header}>
-        <Text
+        <View
           style={[cardStyles.dot, { backgroundColor: Colors.bloodPressure }]}
         />
-        <Text style={cardStyles.title}>💊 Tansiyon</Text>
+        <AppText style={cardStyles.title}>💊 Tansiyon</AppText>
       </View>
 
       {/* Saat seçici */}
@@ -405,11 +405,11 @@ function BloodPressureCard({ onSaved }: BloodPressureCardProps) {
       />
 
       {/* Tansiyon değer girişleri */}
-      <Text style={cardStyles.label}>Tansiyon (mmHg)</Text>
+      <AppText style={cardStyles.label}>Tansiyon (mmHg)</AppText>
       <View style={cardStyles.bpRow}>
         <View style={cardStyles.bpField}>
-          <Text style={cardStyles.bpFieldLabel}>Büyük</Text>
-          <TextInput
+          <AppText style={cardStyles.bpFieldLabel}>Büyük</AppText>
+          <AppTextInput
             style={[
               cardStyles.bpInput,
               fieldError && systolic.trim() === "" ? cardStyles.inputError : {},
@@ -427,11 +427,11 @@ function BloodPressureCard({ onSaved }: BloodPressureCardProps) {
           />
         </View>
 
-        <Text style={cardStyles.bpSeparator}>/</Text>
+        <AppText style={cardStyles.bpSeparator}>/</AppText>
 
         <View style={cardStyles.bpField}>
-          <Text style={cardStyles.bpFieldLabel}>Küçük</Text>
-          <TextInput
+          <AppText style={cardStyles.bpFieldLabel}>Küçük</AppText>
+          <AppTextInput
             style={[
               cardStyles.bpInput,
               fieldError && diastolic.trim() === ""
@@ -451,14 +451,14 @@ function BloodPressureCard({ onSaved }: BloodPressureCardProps) {
           />
         </View>
 
-        <Text style={cardStyles.unit}>mmHg</Text>
+        <AppText style={cardStyles.unit}>mmHg</AppText>
       </View>
 
-      {fieldError && <Text style={cardStyles.errorText}>{fieldError}</Text>}
+      {fieldError && <AppText style={cardStyles.errorText}>{fieldError}</AppText>}
 
       {/* Not */}
-      <Text style={cardStyles.label}>Not (isteğe bağlı)</Text>
-      <TextInput
+      <AppText style={cardStyles.label}>Not (isteğe bağlı)</AppText>
+      <AppTextInput
         style={cardStyles.noteInput}
         value={note}
         onChangeText={setNote}
@@ -696,8 +696,8 @@ function WaterCard({ onSaved }: WaterCardProps) {
     <View style={cardStyles.card}>
       {/* Başlık */}
       <View style={cardStyles.header}>
-        <Text style={[cardStyles.dot, { backgroundColor: "#58A6FF" }]} />
-        <Text style={cardStyles.title}>💧 Su</Text>
+        <View style={[cardStyles.dot, { backgroundColor: "#58A6FF" }]} />
+        <AppText style={cardStyles.title}>💧 Su</AppText>
       </View>
 
       {/* Saat seçici */}
@@ -709,9 +709,9 @@ function WaterCard({ onSaved }: WaterCardProps) {
       />
 
       {/* Miktar girişi */}
-      <Text style={cardStyles.label}>İçilen su miktarı (ml)</Text>
+      <AppText style={cardStyles.label}>İçilen su miktarı (ml)</AppText>
       <View style={cardStyles.inputRow}>
-        <TextInput
+        <AppTextInput
           style={[cardStyles.input, fieldError ? cardStyles.inputError : {}]}
           value={waterValue}
           onChangeText={(t) => {
@@ -724,9 +724,9 @@ function WaterCard({ onSaved }: WaterCardProps) {
           maxLength={4}
           accessibilityLabel="Su miktarı ml"
         />
-        <Text style={cardStyles.unit}>ml</Text>
+        <AppText style={cardStyles.unit}>ml</AppText>
       </View>
-      {fieldError && <Text style={cardStyles.errorText}>{fieldError}</Text>}
+      {fieldError && <AppText style={cardStyles.errorText}>{fieldError}</AppText>}
 
       {/* Kısa yol butonları */}
       <View style={waterStyles.shortcuts}>
@@ -740,7 +740,7 @@ function WaterCard({ onSaved }: WaterCardProps) {
             }}
             activeOpacity={0.75}
           >
-            <Text style={waterStyles.shortcutText}>{ml} ml</Text>
+            <AppText style={waterStyles.shortcutText}>{ml} ml</AppText>
           </TouchableOpacity>
         ))}
       </View>
@@ -807,12 +807,12 @@ export default function HomeScreen() {
       >
         {/* Başlık */}
         <View style={styles.header}>
-          <Text style={styles.appTitle}>Sağlık Takip</Text>
-          <Text style={styles.date}>{today}</Text>
+          <AppText style={styles.appTitle}>Sağlık Takip</AppText>
+          <AppText style={styles.date}>{today}</AppText>
           {savedCount > 0 && (
-            <Text style={styles.savedHint}>
+            <AppText style={styles.savedHint}>
               {savedCount} kayıt bu oturumda eklendi
-            </Text>
+            </AppText>
           )}
         </View>
 

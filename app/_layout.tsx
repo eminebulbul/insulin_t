@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
+import { View, StyleSheet, ActivityIndicator } from "react-native";
 import { Tabs, useRouter, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 
@@ -8,6 +8,9 @@ import { setupNotificationChannel } from "@/utils/notifications";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { subscribeToReminders } from "@/db/firestoreQueries";
 import { syncRemindersWithLocalNotifications } from "@/services/reminderSync";
+
+import { FontSizeProvider } from "@/context/FontSizeContext";
+import { AppText } from "@/components/AppText";
 
 function AppNavigation() {
   const { user, loading } = useAuth();
@@ -51,7 +54,7 @@ function AppNavigation() {
   if (loading) {
     return (
       <View style={styles.splash}>
-        <Text style={styles.splashTitle}>Sağlık Takip</Text>
+        <AppText style={styles.splashTitle}>Sağlık Takip</AppText>
         <ActivityIndicator
           color={Colors.primary}
           size="large"
@@ -76,6 +79,7 @@ function AppNavigation() {
           },
           tabBarActiveTintColor: Colors.primary,
           tabBarInactiveTintColor: Colors.textSecondary,
+          tabBarAllowFontScaling: false,
           tabBarLabelStyle: {
             fontSize: FontSize.xs,
             fontWeight: "600",
@@ -95,7 +99,7 @@ function AppNavigation() {
             title: "Ölçüm Gir",
             tabBarLabel: "Giriş",
             tabBarIcon: ({ color }) => (
-              <Text style={{ fontSize: 24, color }}>📝</Text>
+              <AppText style={{ fontSize: 24, color }}>📝</AppText>
             ),
           }}
         />
@@ -105,7 +109,7 @@ function AppNavigation() {
             title: "Geçmiş",
             tabBarLabel: "Geçmiş",
             tabBarIcon: ({ color }) => (
-              <Text style={{ fontSize: 24, color }}>📊</Text>
+              <AppText style={{ fontSize: 24, color }}>📊</AppText>
             ),
           }}
         />
@@ -115,17 +119,17 @@ function AppNavigation() {
             title: "Hatırlatmalar",
             tabBarLabel: "Hatırlatma",
             tabBarIcon: ({ color }) => (
-              <Text style={{ fontSize: 24, color }}>🔔</Text>
+              <AppText style={{ fontSize: 24, color }}>🔔</AppText>
             ),
           }}
         />
         <Tabs.Screen
           name="export"
           options={{
-            title: "Dışa Aktar",
-            tabBarLabel: "Yedek",
+            title: "Ayarlar",
+            tabBarLabel: "Ayarlar",
             tabBarIcon: ({ color }) => (
-              <Text style={{ fontSize: 24, color }}>💾</Text>
+              <AppText style={{ fontSize: 24, color }}>⚙️</AppText>
             ),
           }}
         />
@@ -144,9 +148,11 @@ function AppNavigation() {
 
 export default function RootLayout() {
   return (
-    <AuthProvider>
-      <AppNavigation />
-    </AuthProvider>
+    <FontSizeProvider>
+      <AuthProvider>
+        <AppNavigation />
+      </AuthProvider>
+    </FontSizeProvider>
   );
 }
 
@@ -164,3 +170,4 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
   },
 });
+

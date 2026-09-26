@@ -2,10 +2,8 @@ import React, { useState, useEffect } from "react";
 import {
   Modal,
   View,
-  Text,
   StyleSheet,
   TouchableOpacity,
-  TextInput,
   ScrollView,
   Alert,
   Platform,
@@ -14,6 +12,8 @@ import {
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Colors, FontSize, Spacing, Radius } from "@/constants/theme";
 import { BigButton } from "@/components/BigButton";
+import { AppText } from "@/components/AppText";
+import { AppTextInput } from "@/components/AppTextInput";
 import {
   GlucoseMeasurement,
   BloodPressureMeasurement,
@@ -298,16 +298,16 @@ export function MeasurementActionModal({
           {step === "actions" && (
             <View>
               <View style={styles.header}>
-                <Text style={styles.headerIcon}>{summary.icon}</Text>
+                <AppText style={styles.headerIcon}>{summary.icon}</AppText>
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.headerTitle}>{summary.title}</Text>
-                  <Text style={styles.headerTime}>{summary.time}</Text>
+                  <AppText style={styles.headerTitle}>{summary.title}</AppText>
+                  <AppText style={styles.headerTime}>{summary.time}</AppText>
                 </View>
               </View>
 
               <View style={styles.summaryBox}>
-                <Text style={styles.summaryValue}>{summary.value}</Text>
-                {summary.sub && <Text style={styles.summarySub}>{summary.sub}</Text>}
+                <AppText style={styles.summaryValue}>{summary.value}</AppText>
+                {summary.sub && <AppText style={styles.summarySub}>{summary.sub}</AppText>}
               </View>
 
               <View style={styles.buttonGroup}>
@@ -336,11 +336,11 @@ export function MeasurementActionModal({
           {/* Adım 2: Silme Onayı (Yaşlı dostu, net) */}
           {step === "confirm_delete" && (
             <View style={styles.confirmBox}>
-              <Text style={styles.warningIcon}>⚠️</Text>
-              <Text style={styles.confirmTitle}>Bu Kayıt Silinsin mi?</Text>
-              <Text style={styles.confirmDesc}>
+              <AppText style={styles.warningIcon}>⚠️</AppText>
+              <AppText style={styles.confirmTitle}>Bu Kayıt Silinsin mi?</AppText>
+              <AppText style={styles.confirmDesc}>
                 {summary.value} ({summary.time}) kaydı kalıcı olarak silinecek. Bu işlem geri alınamaz.
-              </Text>
+              </AppText>
 
               <View style={styles.buttonGroup}>
                 <BigButton
@@ -369,23 +369,23 @@ export function MeasurementActionModal({
               contentContainerStyle={{ paddingBottom: Spacing.xl }}
             >
               <View style={styles.editHeader}>
-                <Text style={styles.headerTitle}>
+                <AppText style={styles.headerTitle}>
                   {summary.icon} {summary.title} Düzenle
-                </Text>
+                </AppText>
               </View>
 
               {/* Saat Seçimi Butonu */}
-              <Text style={styles.inputLabel}>Ölçüm Saati</Text>
+              <AppText style={styles.inputLabel}>Ölçüm Saati</AppText>
               <TouchableOpacity
                 style={styles.timePickerButton}
                 onPress={() => setShowTimePicker(true)}
                 activeOpacity={0.75}
               >
-                <Text style={styles.clockIcon}>🕐</Text>
-                <Text style={styles.timeText}>
+                <AppText style={styles.clockIcon}>🕐</AppText>
+                <AppText style={styles.timeText}>
                   {formatTime(editDate.toISOString())} ({formatShortDate(editDate.toISOString())})
-                </Text>
-                <Text style={styles.changeTimeText}>Değiştir</Text>
+                </AppText>
+                <AppText style={styles.changeTimeText}>Değiştir</AppText>
               </TouchableOpacity>
 
               {showTimePicker && (
@@ -414,7 +414,7 @@ export function MeasurementActionModal({
               {/* Şeker Alanları */}
               {item.kind === "measurement" && item.data.type === "glucose" && (
                 <>
-                  <Text style={styles.inputLabel}>Öğün Durumu</Text>
+                  <AppText style={styles.inputLabel}>Öğün Durumu</AppText>
                   <View style={styles.tagGrid}>
                     {MEAL_TAGS.map((tag) => {
                       const selected = mealTag === tag.value;
@@ -427,21 +427,21 @@ export function MeasurementActionModal({
                           ]}
                           onPress={() => setMealTag(tag.value)}
                         >
-                          <Text
+                          <AppText
                             style={[
                               styles.tagBtnText,
                               selected && styles.tagBtnTextSelected,
                             ]}
                           >
                             {tag.label}
-                          </Text>
+                          </AppText>
                         </TouchableOpacity>
                       );
                     })}
                   </View>
 
-                  <Text style={styles.inputLabel}>Şeker Değeri (mg/dL)</Text>
-                  <TextInput
+                  <AppText style={styles.inputLabel}>Şeker Değeri (mg/dL)</AppText>
+                  <AppTextInput
                     style={styles.largeInput}
                     value={glucoseVal}
                     onChangeText={setGlucoseVal}
@@ -451,8 +451,8 @@ export function MeasurementActionModal({
                     placeholderTextColor={Colors.textDisabled}
                   />
 
-                  <Text style={styles.inputLabel}>Not (isteğe bağlı)</Text>
-                  <TextInput
+                  <AppText style={styles.inputLabel}>Not (isteğe bağlı)</AppText>
+                  <AppTextInput
                     style={styles.noteInput}
                     value={glucoseNote}
                     onChangeText={setGlucoseNote}
@@ -466,11 +466,11 @@ export function MeasurementActionModal({
               {/* Tansiyon Alanları */}
               {item.kind === "measurement" && item.data.type === "blood_pressure" && (
                 <>
-                  <Text style={styles.inputLabel}>Tansiyon Değerleri (mmHg)</Text>
+                  <AppText style={styles.inputLabel}>Tansiyon Değerleri (mmHg)</AppText>
                   <View style={styles.bpRow}>
                     <View style={{ flex: 1 }}>
-                      <Text style={styles.bpSubLabel}>Büyük (Sistolik)</Text>
-                      <TextInput
+                      <AppText style={styles.bpSubLabel}>Büyük (Sistolik)</AppText>
+                      <AppTextInput
                         style={styles.largeInput}
                         value={bpSystolic}
                         onChangeText={setBpSystolic}
@@ -480,10 +480,10 @@ export function MeasurementActionModal({
                         placeholderTextColor={Colors.textDisabled}
                       />
                     </View>
-                    <Text style={styles.bpSlash}>/</Text>
+                    <AppText style={styles.bpSlash}>/</AppText>
                     <View style={{ flex: 1 }}>
-                      <Text style={styles.bpSubLabel}>Küçük (Diyastolik)</Text>
-                      <TextInput
+                      <AppText style={styles.bpSubLabel}>Küçük (Diyastolik)</AppText>
+                      <AppTextInput
                         style={styles.largeInput}
                         value={bpDiastolic}
                         onChangeText={setBpDiastolic}
@@ -495,8 +495,8 @@ export function MeasurementActionModal({
                     </View>
                   </View>
 
-                  <Text style={styles.inputLabel}>Not (isteğe bağlı)</Text>
-                  <TextInput
+                  <AppText style={styles.inputLabel}>Not (isteğe bağlı)</AppText>
+                  <AppTextInput
                     style={styles.noteInput}
                     value={bpNote}
                     onChangeText={setBpNote}
@@ -510,8 +510,8 @@ export function MeasurementActionModal({
               {/* Su Alanı */}
               {item.kind === "water" && (
                 <>
-                  <Text style={styles.inputLabel}>Su Miktarı (ml)</Text>
-                  <TextInput
+                  <AppText style={styles.inputLabel}>Su Miktarı (ml)</AppText>
+                  <AppTextInput
                     style={styles.largeInput}
                     value={waterVal}
                     onChangeText={setWaterVal}
@@ -524,7 +524,8 @@ export function MeasurementActionModal({
               )}
 
               {/* Hata Metni */}
-              {fieldError && <Text style={styles.errorText}>{fieldError}</Text>}
+              {fieldError && <AppText style={styles.errorText}>{fieldError}</AppText>}
+
 
               {/* Kaydet / İptal Butonları */}
               <View style={[styles.buttonGroup, { marginTop: Spacing.lg }]}>
